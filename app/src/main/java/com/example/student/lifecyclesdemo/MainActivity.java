@@ -1,5 +1,6 @@
 package com.example.student.lifecyclesdemo;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -79,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });*/
+
+
         gestureObject = new GestureDetectorCompat(this, new LearnGesture());
 
 
@@ -210,11 +213,6 @@ public class MainActivity extends AppCompatActivity {
         buttonMinus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                /*myEditText.setText(myEditText.getText() + "-");
-                position = myEditText.length();
-                myEditText.setSelection(position);*/
-
                 kalkulacka();
                 akce = rozdil;
                 if (!Double.isNaN(num1)) {
@@ -292,7 +290,6 @@ public class MainActivity extends AppCompatActivity {
       return super.onTouchEvent(event);
     }
 
-
     private void kalkulacka() {
         //kontrola jestli je cislo
         if(!Double.isNaN(num1)) {
@@ -363,23 +360,45 @@ public class MainActivity extends AppCompatActivity {
         Log.v("LIFECYCLE", "OnStop Triggered");
     }
 
-    class LearnGesture extends GestureDetector.SimpleOnGestureListener{
+    private final class LearnGesture extends GestureDetector.SimpleOnGestureListener{
 
-        public boolean onFling(MotionEvent event1,MotionEvent event2, float velocityX, float velocityY){
-            if(event2.getX()> event1.getY()){
+        private static final int SWIPE_THRESHOLD = 100;
+        private static final int SWIPE_VELOCITY_THRESHOLD = 100;
 
-                Intent myIntent = new Intent(MainActivity.this, Main2Activity.class);
-                finish();
-                startActivity(myIntent);
-            }
-            else
-            if(event2.getX()< event1.getY()){
-
-            }
+        @Override
+        public boolean onDown(MotionEvent e) {
             return true;
-
         }
 
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            boolean result = false;
+            try {
+                float diffY = e2.getY() - e1.getY();
+                float diffX = e2.getX() - e1.getX();
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
 
+                        } else {
+                            Intent myIntent = new Intent(MainActivity.this, Main2Activity.class);
+                            finish();
+                            startActivity(myIntent);
+                        }
+                        result = true;
+                    }
+                }
+                else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffY > 0) {
+                        //onSwipeBottom();
+                    } else {
+                        //onSwipeTop();
+                    }
+                    result = true;
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            return result;
+        }
     }
 }

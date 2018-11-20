@@ -1,4 +1,27 @@
 <resources>
     <string name="app_name">Calculator</string>
     <string name="Clear">Clear</string>
+    <string name="textView" />
+    <string name="textView2"><![CDATA[Decimal<->Hexadecimal]]></string>
+    <string name="button20">Convert</string>
+    <string name="editText2">Num to conv</string>
+    <string name="textView5"><![CDATA[Binary<->Hex]]></string>
+    <string name="button21">Convert</string>
+    <string name="editText3">Num to conv</string>
+    <string name="editText">Num to conv</string>
+    <string name="textView4"><![CDATA[Decimal<->Binary]]></string>
+    <string name="editText5">Num to conv</string>
+    <string name="button19">Convert</string>
+    <string-array name="typy_prevodu">
+        <item>toBin</item>
+        <item>toDec</item>
+    </string-array>
+    <string-array name="prevodHex">
+        <item>toHex</item>
+        <item>toDec</item>
+    </string-array>
+    <string-array name="prevodBinHex">
+        <item>toHex</item>
+        <item>toBin</item>
+    </string-array>
 </resources>

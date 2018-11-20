@@ -9,7 +9,7 @@
     android:minWidth="0dp"
     android:minHeight="0dp"
     tools:context=".MainActivity"
-    android:background="@drawable/obrazek"
+    android:background="@drawable/obrazek2"
     >
 
     <TextView
