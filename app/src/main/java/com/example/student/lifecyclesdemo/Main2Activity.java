@@ -1,93 +1,118 @@
 package com.example.student.lifecyclesdemo;
 
-import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.view.GestureDetectorCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 
 public class Main2Activity extends AppCompatActivity {
 
     private GestureDetectorCompat gestureObject;
-    //final float amountToMoveRight=200;
     final float amountToMoveDown=100;
     final float amountToMoveUp =100;
 
-    ViewGroup _root;
     private int _xDelta;
     private int _yDelta;
+    private int index;
 
-    Button prevod,prevod2,prevod3;
-    EditText editTextDec,editText2,editText3;
-    TextView vystup1,vystup2,vystup3;
-    Spinner spinner,spinner2,spinner3;
-    ArrayAdapter<CharSequence> adapter,adapter2,adapter3;
+    Button prevod,prevod2,prevod3,prevodMena;
+    EditText editTextDec,editText2,editText3,editMena;
+    TextView vystup1,vystup2,vystup3,usd,eur,czk,gbp;
+    Spinner spinner,spinner2,spinner3,spinMeny;
+    ArrayAdapter<CharSequence> adapter,adapter2,adapter3,adapterMena;
     LinearLayout tabulka;
 
     private int cislo,cislo2,cislo3;
     private String bin;
+    private double inputValue;
+    private String result[]= new String[10];
+    boolean parsed=false;
+
+    DecimalFormat dec = new DecimalFormat("#.######");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-        gestureObject = new GestureDetectorCompat(this,new LearnGesture());
+        gestureObject = new GestureDetectorCompat(this, new LearnGesture());
 
-       prevod = (Button) findViewById(R.id.button19);
-       prevod2 = (Button) findViewById(R.id.button20);
-       prevod3 = (Button) findViewById(R.id.button21);
+        prevod = (Button) findViewById(R.id.button19);
+        prevod2 = (Button) findViewById(R.id.button20);
+        prevod3 = (Button) findViewById(R.id.button21);
+        prevodMena = (Button) findViewById(R.id.button22);
 
-       editTextDec= (EditText) findViewById(R.id.editText5);
-       editText2= (EditText) findViewById(R.id.editText2);
-       editText3= (EditText) findViewById(R.id.editText3);
+        editTextDec = (EditText) findViewById(R.id.editText5);
+        editText2 = (EditText) findViewById(R.id.editText2);
+        editText3 = (EditText) findViewById(R.id.editText3);
+        editMena = (EditText) findViewById(R.id.editText);
 
-       vystup1 = (TextView) findViewById(R.id.textView);
-       vystup2 = (TextView) findViewById(R.id.textView3);
-       vystup3 = (TextView) findViewById(R.id.textView6);
+        vystup1 = (TextView) findViewById(R.id.textView);
+        vystup2 = (TextView) findViewById(R.id.textView3);
+        vystup3 = (TextView) findViewById(R.id.textView6);
+        usd = (TextView) findViewById(R.id.textView8);
+        eur = (TextView) findViewById(R.id.textView7);
+        czk = (TextView) findViewById(R.id.textView9);
+        gbp = (TextView) findViewById(R.id.textView10);
 
-       spinner = (Spinner) findViewById(R.id.spinner);
-       spinner2 = (Spinner) findViewById(R.id.spinner2);
-       spinner3 = (Spinner) findViewById(R.id.spinner3);
+        spinner = (Spinner) findViewById(R.id.spinner);
+        spinner2 = (Spinner) findViewById(R.id.spinner2);
+        spinner3 = (Spinner) findViewById(R.id.spinner3);
+        spinMeny = (Spinner) findViewById(R.id.spinner4);
 
-       tabulka = (LinearLayout) findViewById(R.id.linearLayout2);
+        tabulka = (LinearLayout) findViewById(R.id.linearLayout2);
 
-       adapter = ArrayAdapter.createFromResource(this,
+        adapter = ArrayAdapter.createFromResource(this,
                 R.array.typy_prevodu, android.R.layout.simple_spinner_item);
 
-       adapter2 = ArrayAdapter.createFromResource(this,
+        adapter2 = ArrayAdapter.createFromResource(this,
                 R.array.prevodHex, android.R.layout.simple_spinner_item);
 
-       adapter3 = ArrayAdapter.createFromResource(this,
+        adapter3 = ArrayAdapter.createFromResource(this,
                 R.array.prevodBinHex, android.R.layout.simple_spinner_item);
+
+        adapterMena = ArrayAdapter.createFromResource(this,
+                R.array.mena, android.R.layout.simple_spinner_item);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapterMena.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
         spinner2.setAdapter(adapter2);
         spinner3.setAdapter(adapter3);
+        spinMeny.setAdapter(adapterMena);
 
         prevod.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,30 +135,47 @@ public class Main2Activity extends AppCompatActivity {
             public void onClick(View view) {
                 String vyber = spinner3.getSelectedItem().toString();
                 HexBin(vyber);
+
+
             }
         });
 
-        /*TranslateAnimation anim = new TranslateAnimation(0, amountToMoveRight, 0, amountToMoveDown);
-        anim.setDuration(1000);
-        anim.setAnimationListener(new TranslateAnimation.AnimationListener() {
-
+        prevodMena.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onAnimationStart(Animation animation) { }
+            public void onClick(View view) {
+                parsed=false;
 
-            @Override
-            public void onAnimationRepeat(Animation animation) { }
+                if(editMena.getText().toString().trim().length()> 0 && !editMena.getText().toString().trim().equals("."));
+                String textValue= editMena.getText().toString();
+                try {
+                    inputValue = Double.parseDouble(textValue);
+                    eur.setText("Čekám");
+                    usd.setText("Čekám");
+                    czk.setText("Čekám");
+                    gbp.setText("Čekám");
+                    parsed=true;
+                }catch(NumberFormatException e){
+                    eur.setText("Not a number");
+                }
+                if(parsed==true) {
+                    new calculate().execute();
+                }
 
-            @Override
-            public void onAnimationEnd(Animation animation)
-            {
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)tabulka.getLayoutParams();
-                params.topMargin += amountToMoveDown;
-                params.leftMargin += amountToMoveRight;
-                tabulka.setLayoutParams(params);
             }
         });
 
-        tabulka.startAnimation(anim);*/
+
+        spinMeny.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                index = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)tabulka.getLayoutParams();
         params.bottomMargin += amountToMoveUp;
@@ -182,6 +224,180 @@ public class Main2Activity extends AppCompatActivity {
         });
 
 
+    }
+
+    public class calculate extends AsyncTask<String,String,String[]> {
+
+        public String getJson(String url) throws ClientProtocolException, IOException {
+            StringBuilder build = new StringBuilder();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(url);
+            HttpResponse response = client.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            InputStream content = entity.getContent();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+            String con;
+            while ((con = reader.readLine()) != null) {
+                build.append(con);
+            }
+            return build.toString();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            if (index == 0) {
+                double usdToEurKurz, usdToCzkKurz, usdToEurVysledek, usdToCzkVysledek, usdToUsdHodnota,usdToGbpKurz,usdToGbpVysledek;
+                usdToUsdHodnota = inputValue * 1;
+                usd.setText("USD: " + dec.format(usdToUsdHodnota));
+
+                usdToEurKurz = Double.parseDouble(result[0]);
+                usdToEurVysledek = inputValue * usdToEurKurz;
+                eur.setText("EUR: " + dec.format(usdToEurVysledek));
+
+                usdToCzkKurz = Double.parseDouble(result[1]);
+                usdToCzkVysledek = inputValue * usdToCzkKurz;
+                czk.setText("CZK: " + dec.format(usdToCzkVysledek));
+
+                usdToGbpKurz = Double.parseDouble(result[2]);
+                usdToGbpVysledek = inputValue * usdToGbpKurz;
+                gbp.setText("GBP: " + dec.format(usdToGbpVysledek));
+
+            } else if (index == 1) {
+                double eurToUsdKurz, eurToCzkKurz, eurToUsdVysledek, eurToCzkVysledek, eurHodnota, eurToGbpKurz,eurToGbpVysledek;
+
+                eurHodnota = inputValue * 1;
+                eur.setText("EUR: " + dec.format(eurHodnota));
+
+                eurToUsdKurz = Double.parseDouble(result[0]);
+                eurToUsdVysledek = inputValue * eurToUsdKurz;
+                usd.setText("USD: " + dec.format(eurToUsdVysledek));
+
+                eurToCzkKurz = Double.parseDouble(result[1]);
+                eurToCzkVysledek = inputValue * eurToCzkKurz;
+                czk.setText("CZK: " + dec.format(eurToCzkVysledek));
+
+                eurToGbpKurz = Double.parseDouble(result[2]);
+                eurToGbpVysledek = inputValue * eurToGbpKurz;
+                gbp.setText("GBP: " + dec.format(eurToGbpVysledek));
+
+            } else if (index == 2) {
+                double CzkToUsdKurz, CzkToEurKurz, CzkToUsdVysledek, CzkToEurVysledek, CzkHodnota,CzkToGbpKurz,CzkToGbpVysledek;
+
+                CzkHodnota = inputValue * 1;
+                czk.setText("CZK: " + dec.format(CzkHodnota));
+
+                CzkToUsdKurz = Double.parseDouble(result[0]);
+                CzkToUsdVysledek = inputValue * CzkToUsdKurz;
+                usd.setText("USD: " + dec.format(CzkToUsdVysledek));
+
+                CzkToEurKurz = Double.parseDouble(result[1]);
+                CzkToEurVysledek = inputValue * CzkToEurKurz;
+                eur.setText("EUR: " + dec.format(CzkToEurVysledek));
+
+                CzkToGbpKurz = Double.parseDouble(result[2]);
+                CzkToGbpVysledek = inputValue * CzkToGbpKurz;
+                gbp.setText("GBP: " + dec.format(CzkToGbpVysledek));
+
+            }else if (index == 3) {
+                double GbpToUsdKurz, GbpToEurKurz, GbpToUsdVysledek, GbpToEurVysledek,GbpHodnota,GbpToCzkKurz,gbpToCzkVysledek;
+
+                GbpHodnota = inputValue * 1;
+                gbp.setText("GBP: " + dec.format(GbpHodnota));
+
+                GbpToUsdKurz = Double.parseDouble(result[0]);
+                GbpToUsdVysledek = inputValue * GbpToUsdKurz;
+                usd.setText("USD: " + dec.format(GbpToUsdVysledek));
+
+                GbpToEurKurz = Double.parseDouble(result[1]);
+                GbpToEurVysledek = inputValue * GbpToEurKurz;
+                eur.setText("EUR: " + dec.format(GbpToEurVysledek));
+
+                GbpToCzkKurz = Double.parseDouble(result[2]);
+                gbpToCzkVysledek = inputValue * GbpToCzkKurz;
+                czk.setText("CZK: " + dec.format(gbpToCzkVysledek));
+            }
+        }
+
+        @Override
+        protected String[] doInBackground(String... strings) {
+            if (index == 0) {
+                String url;
+                try {
+                    url = getJson( "https://api.exchangeratesapi.io/latest?base=USD");
+                    //parsovani JSON
+                    JSONObject reader;
+                    reader = new JSONObject(url);
+                    //JSONArray rateArray = reader.getJSONArray("rates");
+                    JSONObject pole = reader.getJSONObject("rates");
+
+                    result[0] = pole.getString("EUR");
+                    result[1] = pole.getString("CZK");
+                    result[2] = pole.getString("GBP");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (index == 1) {
+                    String url;
+                    try {
+                        url = getJson( "https://api.exchangeratesapi.io/latest?base=EUR");
+                        //parsovani JSON
+                        JSONObject reader;
+                        reader = new JSONObject(url);
+                        JSONObject pole = reader.getJSONObject("rates");
+
+                        result[0] = pole.getString("USD");
+                        result[1] = pole.getString("CZK");
+                        result[2] = pole.getString("GBP");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+            } else if (index == 2) {
+                String url;
+                try {
+                    url = getJson( "https://api.exchangeratesapi.io/latest?base=CZK");
+                    //parsovani JSON
+                    JSONObject reader;
+                    reader = new JSONObject(url);
+                    JSONObject pole = reader.getJSONObject("rates");
+
+                    result[0] = pole.getString("USD");
+                    result[1] = pole.getString("EUR");
+                    result[2] = pole.getString("GBP");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (index == 3) {
+                String url;
+                try {
+                    url = getJson( "https://api.exchangeratesapi.io/latest?base=GBP");
+                    //parsovani JSON
+                    JSONObject reader;
+                    reader = new JSONObject(url);
+                    JSONObject pole = reader.getJSONObject("rates");
+
+                    result[0] = pole.getString("USD");
+                    result[1] = pole.getString("EUR");
+                    result[2] = pole.getString("CZK");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return result;
+        }
     }
 
     public class SpinnerActivity extends Main2Activity implements AdapterView.OnItemSelectedListener {

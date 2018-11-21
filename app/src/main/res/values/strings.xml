@@ -12,6 +12,9 @@
     <string name="textView4"><![CDATA[Decimal<->Binary]]></string>
     <string name="editText5">Num to conv</string>
     <string name="button19">Convert</string>
+    <string name="button22">Convert</string>
+    <string name="textView11">Currency converter</string>
+    <string name="edt1" />
     <string-array name="typy_prevodu">
         <item>toBin</item>
         <item>toDec</item>
@@ -23,5 +26,11 @@
     <string-array name="prevodBinHex">
         <item>toHex</item>
         <item>toBin</item>
+    </string-array>
+    <string-array name="mena">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>CZK</item>
+        <item>GBP</item>
     </string-array>
 </resources>
