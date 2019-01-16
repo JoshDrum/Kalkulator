@@ -383,6 +383,8 @@ public class MainActivity extends AppCompatActivity {
                             Intent myIntent = new Intent(MainActivity.this, Main2Activity.class);
                             finish();
                             startActivity(myIntent);
+                            overridePendingTransition(R.anim.right_to_left,
+                                    R.anim.left_to_right);
                         }
                         result = true;
                     }

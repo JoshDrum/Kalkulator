@@ -10,7 +10,7 @@
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="0dp"
-        android:layout_height="320dp"
+        android:layout_height="300dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -57,7 +57,7 @@
         <LinearLayout
             android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
-            android:layout_height="38dp"
+            android:layout_height="33dp"
             android:background="@android:color/background_light"
             android:orientation="horizontal">
 
@@ -66,10 +66,12 @@
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@android:color/background_light"
                 android:backgroundTint="@android:color/background_light"
                 android:ems="10"
                 android:hint="@string/editText5"
-                android:inputType="textPersonName" />
+                android:inputType="number"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/button19"
@@ -85,7 +87,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:textAlignment="center"
-                android:textSize="18sp" />
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -117,7 +119,7 @@
         <LinearLayout
             android:id="@+id/linearLayout5"
             android:layout_width="match_parent"
-            android:layout_height="38dp"
+            android:layout_height="33dp"
             android:background="@android:color/background_light"
             android:orientation="horizontal">
 
@@ -126,10 +128,12 @@
                 android:layout_width="110dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@android:color/background_light"
                 android:backgroundTint="@android:color/white"
                 android:ems="10"
                 android:hint="@string/editText2"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/button20"
@@ -145,7 +149,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:textAlignment="center"
-                android:textSize="18sp" />
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -177,7 +181,7 @@
         <LinearLayout
             android:id="@+id/linearLayout7"
             android:layout_width="match_parent"
-            android:layout_height="38dp"
+            android:layout_height="33dp"
             android:background="@android:color/background_light"
             android:orientation="horizontal">
 
@@ -190,7 +194,8 @@
                 android:backgroundTint="@android:color/background_light"
                 android:ems="10"
                 android:hint="@string/editText3"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/button21"
@@ -206,7 +211,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:textAlignment="center"
-                android:textSize="18sp" />
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -253,8 +258,9 @@
                 android:layout_weight="1"
                 android:background="@android:color/background_light"
                 android:ems="10"
-                android:inputType="textPersonName"
-                android:textAlignment="center" />
+                android:inputType="number"
+                android:textAlignment="center"
+                android:textColor="@color/colorAccent" />
 
         </LinearLayout>
 

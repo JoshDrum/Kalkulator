@@ -1,7 +1,11 @@
 package com.example.student.lifecyclesdemo;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,12 +42,11 @@ import java.text.ParseException;
 public class Main2Activity extends AppCompatActivity {
 
     private GestureDetectorCompat gestureObject;
-    final float amountToMoveDown=100;
-    final float amountToMoveUp =100;
 
     private int _xDelta;
     private int _yDelta;
     private int index;
+    private String ulozenka;
 
     Button prevod,prevod2,prevod3,prevodMena;
     EditText editTextDec,editText2,editText3,editMena;
@@ -56,14 +60,20 @@ public class Main2Activity extends AppCompatActivity {
     private double inputValue;
     private String result[]= new String[10];
     boolean parsed=false;
+    boolean ulozeno=false;
 
     DecimalFormat dec = new DecimalFormat("#.######");
-
+    private SharedPreferences nPreferences;
+    private SharedPreferences.Editor nEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
+
+        //nPreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        nPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        nEditor= nPreferences.edit();
 
         gestureObject = new GestureDetectorCompat(this, new LearnGesture());
 
@@ -114,6 +124,12 @@ public class Main2Activity extends AppCompatActivity {
         spinner3.setAdapter(adapter3);
         spinMeny.setAdapter(adapterMena);
 
+        ulozenka=nPreferences.getString(getString(R.string.kontrola), "");
+        if( ulozenka.equals("provedeno")==true){
+            ulozeno=true;
+            new calculate().execute();
+        }
+
         prevod.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -158,12 +174,11 @@ public class Main2Activity extends AppCompatActivity {
                     eur.setText("Not a number");
                 }
                 if(parsed==true) {
+                    ulozeno=false;
                     new calculate().execute();
                 }
-
             }
         });
-
 
         spinMeny.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -177,12 +192,7 @@ public class Main2Activity extends AppCompatActivity {
             }
         });
 
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams)tabulka.getLayoutParams();
-        params.bottomMargin += amountToMoveUp;
-        params.topMargin += amountToMoveDown;
-        params.leftMargin = params.rightMargin;
-        params.rightMargin = params.leftMargin;
-        tabulka.setLayoutParams(params);
+        //nEditor.clear();
 
         tabulka.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,39 +201,55 @@ public class Main2Activity extends AppCompatActivity {
             }
         });
 
-        // Implement it's on touch listener.
-        tabulka.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                final int X = (int) event.getRawX();
-                final int Y = (int) event.getRawY();
-                switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        ConstraintLayout.LayoutParams lParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
-                        _xDelta = X - lParams.leftMargin;
-                        _yDelta = Y - lParams.bottomMargin;
-                        break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        break;
-                    case MotionEvent.ACTION_POINTER_UP:
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
-                        //layoutParams.leftMargin = X -_xDelta;
-                        layoutParams.topMargin = -500;
-                        layoutParams.rightMargin = -500;
-                        layoutParams.bottomMargin = Y -_yDelta;
-                        view.setLayoutParams(layoutParams);
-                        break;
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+
+        {
+            tabulka.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+
+                public boolean onTouch (View view, MotionEvent event){
+                    final int X = (int) event.getRawX();
+                    final int Y = (int) event.getRawY();
+                    switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                        case MotionEvent.ACTION_DOWN:
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            ConstraintLayout.LayoutParams lParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+                            _xDelta = X - lParams.leftMargin;
+                            _yDelta = Y - lParams.bottomMargin;
+                            break;
+                        case MotionEvent.ACTION_POINTER_DOWN:
+                            break;
+                        case MotionEvent.ACTION_POINTER_UP:
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+                            //layoutParams.leftMargin = X -_xDelta;
+                            layoutParams.topMargin = -500;
+                            layoutParams.rightMargin = -500;
+                            layoutParams.bottomMargin = Y - _yDelta;
+                            view.setLayoutParams(layoutParams);
+                            break;
+                    }
+                    //_root.invalidate();
+                    return true;
                 }
-                //_root.invalidate();
-                return true;
-            }
-        });
+            });
+        }
+    }
 
+    private void RetrieveSharedPreferences(){
+        String indexx= nPreferences.getString(getString(R.string.volba), "");
+        String vstup= nPreferences.getString(getString(R.string.hodnota), "");
+        String vec11= nPreferences.getString(getString(R.string.vec1), "");
+        String vec22= nPreferences.getString(getString(R.string.vec2), "");
+        String vec33= nPreferences.getString(getString(R.string.vec3), "");
 
+        inputValue=Double.parseDouble(vstup);
+        index= Integer.parseInt(indexx);
+        result[0]=vec11;
+        result[1]=vec22;
+        result[2]=vec33;
     }
 
     public class calculate extends AsyncTask<String,String,String[]> {
@@ -250,6 +276,7 @@ public class Main2Activity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String[] strings) {
+
             if (index == 0) {
                 double usdToEurKurz, usdToCzkKurz, usdToEurVysledek, usdToCzkVysledek, usdToUsdHodnota,usdToGbpKurz,usdToGbpVysledek;
                 usdToUsdHodnota = inputValue * 1;
@@ -325,28 +352,29 @@ public class Main2Activity extends AppCompatActivity {
 
         @Override
         protected String[] doInBackground(String... strings) {
-            if (index == 0) {
-                String url;
-                try {
-                    url = getJson( "https://api.exchangeratesapi.io/latest?base=USD");
-                    //parsovani JSON
-                    JSONObject reader;
-                    reader = new JSONObject(url);
-                    //JSONArray rateArray = reader.getJSONArray("rates");
-                    JSONObject pole = reader.getJSONObject("rates");
-
-                    result[0] = pole.getString("EUR");
-                    result[1] = pole.getString("CZK");
-                    result[2] = pole.getString("GBP");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else if (index == 1) {
+            if(ulozeno==false){
+                if (index == 0) {
                     String url;
                     try {
-                        url = getJson( "https://api.exchangeratesapi.io/latest?base=EUR");
+                        url = getJson("https://api.exchangeratesapi.io/latest?base=USD");
+                        //parsovani JSON
+                        JSONObject reader;
+                        reader = new JSONObject(url);
+                        //JSONArray rateArray = reader.getJSONArray("rates");
+                        JSONObject pole = reader.getJSONObject("rates");
+
+                        result[0] = pole.getString("EUR");
+                        result[1] = pole.getString("CZK");
+                        result[2] = pole.getString("GBP");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else if (index == 1) {
+                    String url;
+                    try {
+                        url = getJson("https://api.exchangeratesapi.io/latest?base=EUR");
                         //parsovani JSON
                         JSONObject reader;
                         reader = new JSONObject(url);
@@ -361,40 +389,53 @@ public class Main2Activity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-            } else if (index == 2) {
-                String url;
-                try {
-                    url = getJson( "https://api.exchangeratesapi.io/latest?base=CZK");
-                    //parsovani JSON
-                    JSONObject reader;
-                    reader = new JSONObject(url);
-                    JSONObject pole = reader.getJSONObject("rates");
+                } else if (index == 2) {
+                    String url;
+                    try {
+                        url = getJson("https://api.exchangeratesapi.io/latest?base=CZK");
+                        //parsovani JSON
+                        JSONObject reader;
+                        reader = new JSONObject(url);
+                        JSONObject pole = reader.getJSONObject("rates");
 
-                    result[0] = pole.getString("USD");
-                    result[1] = pole.getString("EUR");
-                    result[2] = pole.getString("GBP");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else if (index == 3) {
-                String url;
-                try {
-                    url = getJson( "https://api.exchangeratesapi.io/latest?base=GBP");
-                    //parsovani JSON
-                    JSONObject reader;
-                    reader = new JSONObject(url);
-                    JSONObject pole = reader.getJSONObject("rates");
+                        result[0] = pole.getString("USD");
+                        result[1] = pole.getString("EUR");
+                        result[2] = pole.getString("GBP");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else if (index == 3) {
+                    String url;
+                    try {
+                        url = getJson("https://api.exchangeratesapi.io/latest?base=GBP");
+                        //parsovani JSON
+                        JSONObject reader;
+                        reader = new JSONObject(url);
+                        JSONObject pole = reader.getJSONObject("rates");
 
-                    result[0] = pole.getString("USD");
-                    result[1] = pole.getString("EUR");
-                    result[2] = pole.getString("CZK");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                        result[0] = pole.getString("USD");
+                        result[1] = pole.getString("EUR");
+                        result[2] = pole.getString("CZK");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
+
+                nEditor.putString(getString(R.string.volba), String.valueOf(index));
+                nEditor.putString(getString(R.string.hodnota), String.valueOf(inputValue));
+                nEditor.putString(getString(R.string.vec1), result[0]);
+                nEditor.putString(getString(R.string.vec2), result[1]);
+                nEditor.putString(getString(R.string.vec3), result[2]);
+                ulozeno=true;
+                nEditor.putString(getString(R.string.kontrola), "provedeno");
+                nEditor.commit();
+            }
+            else{
+                RetrieveSharedPreferences();
             }
             return result;
         }
@@ -507,6 +548,8 @@ public class Main2Activity extends AppCompatActivity {
                             Intent myIntent = new Intent(Main2Activity.this, MainActivity.class);
                             finish();
                             startActivity(myIntent);
+                            overridePendingTransition(R.anim.left_to_right,
+                                    R.anim.right_to_left);
                         } else {
 
                         }

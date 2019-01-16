@@ -4,16 +4,21 @@
     <string name="textView" />
     <string name="textView2"><![CDATA[Decimal<->Hexadecimal]]></string>
     <string name="button20">Convert</string>
-    <string name="editText2">Num to conv</string>
+    <string name="editText2">Num to convert</string>
     <string name="textView5"><![CDATA[Binary<->Hex]]></string>
     <string name="button21">Convert</string>
-    <string name="editText3">Num to conv</string>
-    <string name="editText">Num to conv</string>
+    <string name="editText3">Number to convert</string>
     <string name="textView4"><![CDATA[Decimal<->Binary]]></string>
-    <string name="editText5">Num to conv</string>
+    <string name="editText5">Number to convert</string>
     <string name="button19">Convert</string>
     <string name="button22">Convert</string>
     <string name="textView11">Currency converter</string>
+    <string name="vec1">com.example.student.lifecyclesdemo.vec1</string>
+    <string name="vec2">com.example.student.lifecyclesdemo.vec2</string>
+    <string name="vec3">com.example.student.lifecyclesdemo.vec3</string>
+    <string name="kontrola">com.example.student.lifecyclesdemo.kontrola</string>
+    <string name="volba">com.example.student.lifecyclesdemo.volba</string>
+    <string name="hodnota">com.example.student.lifecyclesdemo.hodnota</string>
     <string name="edt1" />
     <string-array name="typy_prevodu">
         <item>toBin</item>
