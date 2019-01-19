@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/obrazek2"
+    android:background="@drawable/bck_image"
     tools:context=".Main2Activity">
 
     <LinearLayout

@@ -9,7 +9,7 @@
     android:minWidth="0dp"
     android:minHeight="0dp"
     tools:context=".MainActivity"
-    android:background="@drawable/obrazek2"
+    android:background="@drawable/bck_image"
     >
 
     <TableLayout
@@ -275,6 +275,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/linearLayout8">
+
+        <Button
+            android:id="@+id/button27"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:text="Button" />
 
         <Button
             android:id="@+id/button18"
