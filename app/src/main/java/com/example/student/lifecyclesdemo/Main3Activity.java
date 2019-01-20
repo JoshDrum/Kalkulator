@@ -188,11 +188,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         progressDialog.dismiss();
                         Toast.makeText(getApplicationContext(),"Dokončeno", Toast.LENGTH_LONG);
                         //uloz nazev a url do databaze
-                        //String uploadId = mDatabaseRef.push().getKey();
-                        //mDatabaseRef.child(uploadId).setValue(imageUpload);
                         ImageUpload imageUpload = new ImageUpload(nazevSouboru, downloadUri.toString());
-                        //String uploadId = mDatabaseRef.push().getKey();
-                        //mDatabaseRef.child(uploadId).setValue(imageUpload);
                         mDatabaseRef.push().setValue(imageUpload);
                         buttonUpload.setEnabled(false);
                     } else {
