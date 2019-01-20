@@ -3,20 +3,26 @@ package com.example.student.lifecyclesdemo;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,46 +35,44 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
-import java.text.DateFormat;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
-import java.util.Collections;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
-public class Main3Activity extends AppCompatActivity implements View.OnClickListener{
+public class Main3Activity extends AppCompatActivity implements View.OnClickListener,FragmentDownload.OnFragmentInteractionListener {
 
     private GestureDetectorCompat gestureObject;
-    private ImageView imageView;
-    private static final int PICK_IMAGE_REQUEST = 234;
+    public static final String FB_STORAGE_PATH = "uploaded/";
+    public static final String FB_DATABASE_PATH = "uploaded";
     private static final int PICKFILE_REQUEST_CODE = 33;
     DecimalFormat df = new DecimalFormat("####0.00");
 
     private Uri filePath;
     private StorageReference mStorageRef;
+    private DatabaseReference mDatabaseRef;
+    Bitmap bitmap = null;
     /*static String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/";*/
     EditText myEditText;
     TextView fileView;
-    Button tl1,tl2,tl3,buttonUpload,buttonChoose;
+    Button buttonDownload,buttonUpload,buttonChoose;
     String nazevSouboru="";
 
     @Override
@@ -79,13 +83,55 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
         buttonChoose = (Button) findViewById(R.id.open_btn);
         //findViewById(R.id.create_btn);
         buttonUpload = (Button)findViewById(R.id.query_btn);
-        imageView=(ImageView) findViewById(R.id.imageView);
-        fileView = (TextView) findViewById(R.id.textView12);
+        buttonUpload.setEnabled(false);
+        //imageView=(ImageView) findViewById(R.id.imageView);
+        //fileView = (TextView) findViewById(R.id.textView12);
 
         gestureObject = new GestureDetectorCompat(this, new Main3Activity.LearnGesture());
         buttonChoose.setOnClickListener(this);
         buttonUpload.setOnClickListener(this);
         mStorageRef = FirebaseStorage.getInstance().getReference();
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference(FB_DATABASE_PATH);
+
+        // Check that the activity is using the layout version with
+        // the fragment_container FrameLayout
+        if (findViewById(R.id.fragment_container) != null) {
+
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            // Create a new Fragment to be placed in the activity layout
+            FragmentOne firstFragment = new FragmentOne();
+
+            // In case this activity was started with special instructions from an
+            // Intent, pass the Intent's extras to the fragment as arguments
+            firstFragment.setArguments(getIntent().getExtras());
+            // Add the fragment to the 'fragment_container' FrameLayout
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, firstFragment).commit();
+        }
+    }
+
+    public void changeFragment(View view){
+        Fragment fragment;
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        if(view == findViewById(R.id.storage_btn)){
+            fragment = new FragmentDownload();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+            buttonUpload.setEnabled(false);
+        }
+        /*if(view == findViewById(R.id.download_btn)){
+            fragment = new FragmentUpload();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.commit();
+        }*/
     }
 
     public String getFileName(Uri uri) {
@@ -111,20 +157,70 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     }
 
     private void uploadFile(){
+
         if(filePath !=null) {
             ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setTitle("Nahrávání..");
             progressDialog.show();
 
-                StorageReference riversRef = mStorageRef.child("uploaded/" + nazevSouboru);
-                riversRef.putFile(filePath)
-                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                //StorageReference riversRef = mStorageRef.child(FB_STORAGE_PATH + System.currentTimeMillis() + nazevSouboru );
+            final StorageReference riversRef = mStorageRef.child(FB_STORAGE_PATH + System.currentTimeMillis() + nazevSouboru );
+            UploadTask uploadTask = riversRef.putFile(filePath);
+
+            //Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        //throw task.getException();
+                        progressDialog.dismiss();
+                        Toast.makeText(getApplicationContext(), task.getException().toString(), Toast.LENGTH_LONG);
+                    }
+
+                    // Continue with the task to get the download URL
+                    return riversRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        progressDialog.dismiss();
+                        Toast.makeText(getApplicationContext(),"Dokončeno", Toast.LENGTH_LONG);
+                        //uloz nazev a url do databaze
+                        //String uploadId = mDatabaseRef.push().getKey();
+                        //mDatabaseRef.child(uploadId).setValue(imageUpload);
+                        ImageUpload imageUpload = new ImageUpload(nazevSouboru, downloadUri.toString());
+                        //String uploadId = mDatabaseRef.push().getKey();
+                        //mDatabaseRef.child(uploadId).setValue(imageUpload);
+                        mDatabaseRef.push().setValue(imageUpload);
+                        buttonUpload.setEnabled(false);
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    progressDialog.setMessage((int) progress + "% Nahráno..");
+                }
+            });
+
+
+                        /*.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            riversRef.getDownloadUrl();
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                // Get a URL to the uploaded content
-                                //Uri downloadUrl = taskSnapshot.getDownloadUrl();
                                 progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),"Soubor nahrán", Toast.LENGTH_LONG);
+                                ImageUpload imageUpload = new ImageUpload(nazevSouboru, taskSnapshot.getResult().toString()) ;
+                                //taskSnapshot.getMetadata().getReference().getDownloadUrl().toString()
+                                //uloz nazev a url do databaze
+                                String uploadId = mDatabaseRef.push().getKey();
+                                mDatabaseRef.child(uploadId).setValue(imageUpload);
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -141,9 +237,9 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                                 //kalkulace progresu uploadovani
                                 double progress = (100.0 * taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
-                                progressDialog.setMessage(((int) progress) + "% Nahráno..");
+                                progressDialog.setMessage((int) progress + "% Nahráno..");
                             }
-                        });
+                        });*/
         }else{
 
         }
@@ -151,7 +247,6 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
 
     private void showFileChooser(){
         Intent intent = new Intent();
-        //intent.setType("image/*");
         intent.setType("*/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent,"Open File"), PICKFILE_REQUEST_CODE);
@@ -160,21 +255,44 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        FragmentUpload uploadFr = new FragmentUpload();
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+
         if(requestCode == PICKFILE_REQUEST_CODE && resultCode == RESULT_OK && data!= null && data .getData()!= null){
            filePath = data.getData();
+            bitmap=null;
+            buttonUpload.setEnabled(true);
+           //ziskani informaci o souboru
             nazevSouboru=getFileName(filePath);
             String prip = pripona(nazevSouboru);
-            //fileView.setText(filePath.getPath() + nazevSouboru);
-            fileView.setText("SELECTED : " + nazevSouboru + " SIZE : " + getRealSizeFromUri(filePath) + " kB ");
+            //odeslani informaci fragmentu
+            Bundle b2 = new Bundle();
+            b2.putString("info", "SELECTED : " + nazevSouboru + " SIZE : " + getRealSizeFromUri(filePath) + " kB ");
+            uploadFr.setArguments(b2);
+            t.replace(R.id.fragment_container, uploadFr);
+            t.addToBackStack(null);
+            t.commit();
            if(prip.equals("jpg") || prip.equals("jpeg") || prip.equals("PNG")){
                try {
-                   Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                   imageView.setImageBitmap(bitmap);
+                   bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                } catch (IOException e) {
                    e.printStackTrace();
                }
+                   /*Bundle b3 = new Bundle();
+                   b3.putString("selected_image", image_url);
+                   uploadFr.setArguments(b3);*/
            }
         }
+    }
+
+    String myString="";
+    public Bitmap getMyData() {
+        return bitmap;
+    }
+
+    public void onFragmentInteraction(Uri uri) {
+        // The user selected the headline of an article from the HeadlinesFragment
+        // Do something here to display that article
     }
 
     @Override
@@ -183,6 +301,8 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
             showFileChooser();
         }else if(v==buttonUpload){
             uploadFile();
+        }else if(v==buttonDownload){
+
         }
     }
 
@@ -202,16 +322,13 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
     private String getRealSizeFromUri(Uri uri) {
         Cursor cursor = null;
         double value=0;
-        String tmp="";
         try {
             String[] proj = { MediaStore.Audio.Media.SIZE };
             cursor = getContentResolver().query(uri, proj, null, null, null);
             //cursor = context.getContentResolver().query(uri, proj, null, null, null);
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE);
             cursor.moveToFirst();
-            //return cursor.getString(column_index);
-            tmp = cursor.getString(column_index);
-            value=(Double.parseDouble(tmp) * 0.0009765625);
+            value=(Double.parseDouble(cursor.getString(column_index)) * 0.0009765625);
             return df.format(value);
         } finally {
             if (cursor != null) {
@@ -240,7 +357,7 @@ public class Main3Activity extends AppCompatActivity implements View.OnClickList
                         if (diffX > 0) {
 
                         } else {
-                            Intent myIntent = new Intent(Main3Activity.this, Main2Activity.class);
+                            Intent myIntent = new Intent(Main3Activity.this, MainActivity.class);
                             finish();
                             startActivity(myIntent);
                             overridePendingTransition(R.anim.slide_in_left,

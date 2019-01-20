@@ -83,10 +83,9 @@ public class FragmentDownload extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
         imgList = new ArrayList<>();
 
-        //progressDialog = new ProgressDialog(this);
+        //progressDialog = new ProgressDialog(getContext());
         mDatabaseRef = FirebaseDatabase.getInstance().getReference(Main3Activity.FB_DATABASE_PATH);
 
     }

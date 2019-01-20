@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Calculator</string>
+    <string name="app_name">MyApp</string>
     <string name="Clear">Clear</string>
     <string name="textView" />
     <string name="textView2"><![CDATA[Decimal<->Hexadecimal]]></string>

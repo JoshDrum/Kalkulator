@@ -14,15 +14,29 @@
 
         <ImageView
             android:id="@+id/imageView3"
-            android:layout_width="401dp"
+            android:layout_width="match_parent"
             android:layout_height="241dp"
-            android:background="@drawable/cloud" />
+            android:background="@drawable/cloud"
+            android:textAlignment="center" />
 
         <TextView
             android:id="@+id/textView14"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Cloud" />
+            android:layout_height="105dp"
+            android:shadowColor="@android:color/darker_gray"
+            android:text="My Storage"
+            android:textAlignment="center"
+            android:textColor="@android:color/background_light"
+            android:textSize="@android:dimen/notification_large_icon_height" />
+
+        <TextView
+            android:id="@+id/textView12"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:text="Firebase"
+            android:textAlignment="center"
+            android:textColor="@color/oranz"
+            android:textSize="30sp" />
     </LinearLayout>
 
 </FrameLayout>
