@@ -1,6 +1,5 @@
 package com.example.student.lifecyclesdemo;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -27,17 +26,14 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -71,7 +67,6 @@ public class Main2Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-        //nPreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         nPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         nEditor= nPreferences.edit();
 
@@ -151,8 +146,6 @@ public class Main2Activity extends AppCompatActivity {
             public void onClick(View view) {
                 String vyber = spinner3.getSelectedItem().toString();
                 HexBin(vyber);
-
-
             }
         });
 
@@ -192,17 +185,14 @@ public class Main2Activity extends AppCompatActivity {
             }
         });
 
-        //nEditor.clear();
-
-        tabulka.setOnClickListener(new View.OnClickListener() {
+        /*tabulka.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //ukazalo message
+                //mozny toast
             }
-        });
+        });*/
 
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-
         {
             tabulka.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -211,27 +201,22 @@ public class Main2Activity extends AppCompatActivity {
                     final int X = (int) event.getRawX();
                     final int Y = (int) event.getRawY();
                     switch (event.getAction() & MotionEvent.ACTION_MASK) {
+
                         case MotionEvent.ACTION_DOWN:
+                            ConstraintLayout.LayoutParams lParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
+                            _yDelta = Y - lParams.topMargin;
+                            //_yDelta = Y - lParams.bottomMargin;
                             break;
                         case MotionEvent.ACTION_UP:
-                            ConstraintLayout.LayoutParams lParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
-                            _xDelta = X - lParams.leftMargin;
-                            _yDelta = Y - lParams.bottomMargin;
-                            break;
-                        case MotionEvent.ACTION_POINTER_DOWN:
-                            break;
-                        case MotionEvent.ACTION_POINTER_UP:
                             break;
                         case MotionEvent.ACTION_MOVE:
                             ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) view.getLayoutParams();
-                            //layoutParams.leftMargin = X -_xDelta;
-                            layoutParams.topMargin = -500;
-                            layoutParams.rightMargin = -500;
+                            layoutParams.topMargin = 0;
+                            layoutParams.rightMargin = 0;
                             layoutParams.bottomMargin = Y - _yDelta;
                             view.setLayoutParams(layoutParams);
                             break;
                     }
-                    //_root.invalidate();
                     return true;
                 }
             });
@@ -548,10 +533,9 @@ public class Main2Activity extends AppCompatActivity {
                             Intent myIntent = new Intent(Main2Activity.this, MainActivity.class);
                             finish();
                             startActivity(myIntent);
-                            overridePendingTransition(R.anim.left_to_right,
-                                    R.anim.right_to_left);
+                            overridePendingTransition(R.anim.slide_in_right,
+                                    R.anim.slide_out_left);
                         } else {
-
                         }
                         result = true;
                     }

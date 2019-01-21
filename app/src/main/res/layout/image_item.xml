@@ -8,13 +8,16 @@
 
     <ImageView
         android:id="@+id/obraz"
-        android:layout_width="414dp"
-        android:layout_height="177dp" />
+        android:layout_width="match_parent"
+        android:layout_height="177dp"
+        android:background="@drawable/zaobleni" />
 
     <TextView
         android:id="@+id/tvFilename"
-        android:layout_width="401dp"
+        android:layout_width="match_parent"
         android:layout_height="53dp"
+        android:background="@color/tlacitka2"
+        android:fontFamily="sans-serif-condensed"
         android:gravity="center"
         android:text="File name"
         android:textColor="@android:color/background_light"

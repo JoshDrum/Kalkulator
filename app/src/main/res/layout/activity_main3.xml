@@ -11,30 +11,30 @@
     <LinearLayout
         android:id="@+id/btn_layout"
         android:layout_width="match_parent"
-        android:layout_height="62dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/zaobleni"
         android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <Button
             android:id="@+id/open_btn"
-            style="@android:style/Widget.Button"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:onClick="changeFragment"
             android:text="Choose"
-            android:textSize="12sp" />
+            android:textSize="10sp" />
 
         <Button
             android:id="@+id/query_btn"
-            style="@android:style/Widget.Button"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Upload"
-            android:textSize="12sp" />
+            android:textSize="10sp" />
 
         <Button
             android:id="@+id/storage_btn"
@@ -47,22 +47,30 @@
             android:textSize="10sp" />
 
         <Button
-            android:id="@+id/download_btn"
+            android:id="@+id/exit_btn"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginRight="10dp"
             android:layout_weight="1"
             android:onClick="changeFragment"
-            android:text="Download"
+            android:text="Exit"
             android:textSize="10sp" />
 
     </LinearLayout>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="495dp"
-        android:background="@drawable/zaobleni_dolu" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="68dp"
+        android:background="@drawable/zaobleni_dolu"
+        >
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
 </RelativeLayout>

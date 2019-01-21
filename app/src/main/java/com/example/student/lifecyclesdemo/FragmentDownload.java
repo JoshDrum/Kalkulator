@@ -1,8 +1,10 @@
 package com.example.student.lifecyclesdemo;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -47,12 +49,10 @@ import java.util.List;
 public class FragmentDownload extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM1 = "msg";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -62,37 +62,34 @@ public class FragmentDownload extends Fragment {
     private FileListAdapter adapter;
     private ProgressDialog progressDialog;
     String fileUrl,fileName = "";
+    private static FragmentDownload instance = null;
 
 
     public FragmentDownload() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentDownload.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentDownload newInstance(String param1, String param2) {
-        FragmentDownload fragment = new FragmentDownload();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static FragmentDownload newInstance(String text) {
+        if(instance == null){
+            // new instance
+            instance = new FragmentDownload();
+
+            // sets data to bundle
+            Bundle bundle = new Bundle();
+            bundle.putString("msg", text);
+            // set data to fragment
+            instance.setArguments(bundle);
+
+            return instance;
+        } else {
+            return instance;
+        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
         fileList = new ArrayList<>();
 
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -109,6 +106,9 @@ public class FragmentDownload extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+        }
         return inflater.inflate(R.layout.fragment_fragment_download, container, false);
     }
 
@@ -126,8 +126,10 @@ public class FragmentDownload extends Fragment {
                     fileList.add(file);
                 }
 
-                adapter = new FileListAdapter(getContext(), R.layout.image_item, fileList);
-                lv.setAdapter(adapter);
+                try {
+                    adapter = new FileListAdapter(getContext(), R.layout.image_item, fileList);
+                    lv.setAdapter(adapter);
+                }catch (Exception e){};
             }
 
             @Override
@@ -144,7 +146,25 @@ public class FragmentDownload extends Fragment {
                 ImageUpload file = (ImageUpload) parent.getItemAtPosition(position);
                 fileUrl = file.getUrl();
                 fileName = file.getName();
-                downloadFile();
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+                builder.setTitle("Moje úložiště");
+
+                builder.setMessage("Stáhnout tento soubor? : " + fileName )
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                downloadFile();
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
 
         });
@@ -153,15 +173,13 @@ public class FragmentDownload extends Fragment {
     private void downloadFile() {
 
         if (fileUrl != null && fileName != null ) {
-            ProgressDialog progressDialog = new ProgressDialog(getContext());
+            progressDialog = new ProgressDialog(getContext());
             progressDialog.setTitle("Stahování..");
             progressDialog.show();
 
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReferenceFromUrl(fileUrl);
-            //File rootPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Firebase/", fileName);
-            File rootPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Firebase/");
-            //File rootPath = new File(Environment.getExternalStorageDirectory() + "/Download/Firebase/");
+            File rootPath = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "/Firebase/");
             if (!rootPath.exists()) {
                 rootPath.mkdirs();
             }

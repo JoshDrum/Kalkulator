@@ -2,6 +2,8 @@ package com.example.student.lifecyclesdemo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -21,6 +23,7 @@ public class FileListAdapter extends ArrayAdapter<ImageUpload> {
     private Context context;
     private int resource;
     private List<ImageUpload> listImage;
+    String[] matches = new String[] {"jpg", "jpeg", "PNG", "png"};
 
     public FileListAdapter(@NonNull Context context, int resource, @NonNull List<ImageUpload> objects) {
         super(context, resource, objects);
@@ -35,11 +38,28 @@ public class FileListAdapter extends ArrayAdapter<ImageUpload> {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
 
         View v = inflater.inflate(resource,null);
-        TextView tvName = (TextView) v.findViewById(R.id.tvFilename);
-        ImageView img = (ImageView) v.findViewById(R.id.obraz);
+        TextView tvName = v.findViewById(R.id.tvFilename);
+        ImageView img = v.findViewById(R.id.obraz);
+        String popis=listImage.get(position).getName();
 
-        tvName.setText(listImage.get(position).getName());
-        Glide.with(context).load(listImage.get(position).getUrl()).into(img);
-                return v;
+        tvName.setText(popis);
+
+        for (String s : matches)
+        {
+            if (popis.contains(s))
+            {
+                Glide.with(context).load(listImage.get(position).getUrl()).into(img);
+                break;
+            }
+            else
+                img.setImageResource(R.drawable.no);
+        }
+
+        /*if(popis.contains(JPG)){
+            Glide.with(context).load(listImage.get(position).getUrl()).into(img);
+        }else
+        img.setImageResource(R.drawable.no);*/
+
+        return v;
     }
 }

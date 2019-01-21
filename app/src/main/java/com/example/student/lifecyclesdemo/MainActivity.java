@@ -1,6 +1,5 @@
 package com.example.student.lifecyclesdemo;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button button0, button1, button2, button3, button4, button5, button6,
             button7, button8, button9, buttonPlus, buttonMinus, buttonDeleni,
-            buttonNasobeni, buttonTecka, buttonClear, buttonVysledek,buttonInv, next;
+            buttonNasobeni, buttonTecka, buttonClear, buttonVysledek,buttonInv, buttonDropbox;
 
     EditText myEditText;
     TextView zobraz;
@@ -46,10 +45,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Toast toast = Toast.makeText(this, "onCreate Triggered", Toast.LENGTH_SHORT);
-        toast.show();
-        Log.v("LIFECYCLE", "OnCreate Triggered");
 
         button0 = (Button) findViewById(R.id.button16);
         button1 = (Button) findViewById(R.id.button2);
@@ -71,16 +66,7 @@ public class MainActivity extends AppCompatActivity {
         buttonInv = (Button) findViewById(R.id.button18);
         myEditText = (EditText) findViewById(R.id.edt1);
         zobraz = (TextView) findViewById(R.id.display);
-       //next = (Button) findViewById(R.id.Button01);
-
-        /*next.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                //Intent myIntent = new Intent(view.getContext(), Activity2.class);
-                //startActivityForResult(myIntent, 0);
-            }
-
-        });*/
-
+        buttonDropbox = (Button) findViewById(R.id.button27);
 
         gestureObject = new GestureDetectorCompat(this, new LearnGesture());
 
@@ -196,6 +182,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        buttonDropbox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(MainActivity.this, Main3Activity.class);
+                finish();
+                startActivity(myIntent);
+            }
+        });
+
         buttonPlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -285,11 +280,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public boolean onTouchEvent(MotionEvent event){
-      this.gestureObject.onTouchEvent(event);
-      return super.onTouchEvent(event);
-    }
-
     private void kalkulacka() {
         //kontrola jestli je cislo
         if(!Double.isNaN(num1)) {
@@ -330,34 +320,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        Toast toast = Toast.makeText(this, "onStart Triggered", Toast.LENGTH_SHORT);
-        toast.show();
-        Log.v("LIFECYCLE", "OnStart Triggered");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        Toast toast = Toast.makeText(this, "onResume Triggered", Toast.LENGTH_SHORT);
-        toast.show();
-        Log.v("LIFECYCLE", "OnResume Triggered");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.v("LIFECYCLE", "OnPause Triggered");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.v("LIFECYCLE", "OnStop Triggered");
+    public boolean onTouchEvent(MotionEvent event){
+        this.gestureObject.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     private final class LearnGesture extends GestureDetector.SimpleOnGestureListener{
@@ -383,8 +348,8 @@ public class MainActivity extends AppCompatActivity {
                             Intent myIntent = new Intent(MainActivity.this, Main2Activity.class);
                             finish();
                             startActivity(myIntent);
-                            overridePendingTransition(R.anim.right_to_left,
-                                    R.anim.left_to_right);
+                            overridePendingTransition(R.anim.slide_in_left,
+                                    R.anim.slide_out_right);
                         }
                         result = true;
                     }
